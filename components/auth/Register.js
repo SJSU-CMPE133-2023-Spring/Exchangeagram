@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 import { View, Button, TextInput  } from 'react-native'
 
 
-import firebase from 'firebase/auth'
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
+
 export class Register extends Component {
     constructor(props){
         super(props);
@@ -12,18 +13,19 @@ export class Register extends Component {
             email : '',
             password: ''
         }
-        this.onSignUp = this.onSignUp.bind(this)
+        this.onSignUp = this.onSignUp.bind(this);
     }
 
     onSignUp(){
-        const { email, password, name } = this.state;
-        firebase.auth().createUserwithEmailAndPassword(email, password)
-        .then((result) => { 
+        const { name, email, password } = this.state;
+        const auth = getAuth();
+        createUserWithEmailAndPassword(auth, email, password)
+        .then((result) => { // Succesfull Sign Up
             console.log(result)
         })
-        .catch((error) => {
+        .catch((error) => { // Error on Sign Up
             console.log(error)
-        })
+        });
     }
 
   render() {

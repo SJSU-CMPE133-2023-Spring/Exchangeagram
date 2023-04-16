@@ -4,7 +4,6 @@ import react from 'react';
 // Fire Base Components
 import { initializeApp } from 'firebase/app';
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyC63abKl535Hdz0gHccQ9qAFF-bHxWamOw",
@@ -17,10 +16,8 @@ const firebaseConfig = {
 };
 
 // INIT Firebase Components
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore();
-export { auth, db };
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
 
 // React Navigation Components
 import { NavigationContainer } from '@react-navigation/native';
