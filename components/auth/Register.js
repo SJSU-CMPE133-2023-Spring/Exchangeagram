@@ -3,6 +3,8 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-nativ
 
 
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"
+import { getFirestore, collection } from "firebase/firestore"
+import { doc, setDoc } from "firebase/firestore";
 
 export class Register extends Component {
     constructor(props){
@@ -19,9 +21,14 @@ export class Register extends Component {
     onSignUp(){
         const { name, email, password } = this.state;
         const auth = getAuth();
+        const db = getFirestore();
         createUserWithEmailAndPassword(auth, email, password)
-        .then((result) => { // Succesfull Sign Up
-            console.log(result)
+        .then(async (currentUser) => { // Succesfull Sign Up
+            await setDoc(doc(db, "users", currentUser.user.uid), {
+                name,
+                email
+            })
+            console.log(currentUser)
         })
         .catch((error) => { // Error on Sign Up
             console.log(error)

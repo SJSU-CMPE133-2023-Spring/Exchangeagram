@@ -6,6 +6,7 @@ import { View, Text } from 'react-native'
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
+
 const firebaseConfig = {
   apiKey: "AIzaSyC63abKl535Hdz0gHccQ9qAFF-bHxWamOw",
   authDomain: "exchangeagram-b6617.firebaseapp.com",
