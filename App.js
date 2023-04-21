@@ -1,4 +1,3 @@
-import { StatusBar } from 'expo-status-bar';
 import React, { Component } from 'react';
 import { View, Text } from 'react-native'
 
@@ -36,7 +35,7 @@ import { createStackNavigator } from '@react-navigation/stack'
 import LandingScreen from './components/auth/Landing'
 import RegisterScreen from './components/auth/Register'
 import LoginScreen from './components/auth/Login'
-import MainScreen, { Main } from './components/Main'
+import MainScreen from './components/Main'
 
 const Stack = createStackNavigator();
 
@@ -91,7 +90,7 @@ export class App extends Component {
 
     return(
       <Provider store = { store }>
-        <MainScreen />
+        <MainScreen/>
       </Provider>
     )
   }
