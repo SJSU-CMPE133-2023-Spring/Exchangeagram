@@ -3,7 +3,6 @@ import { View, Text } from 'react-native';
 
 import { connect } from 'react-redux';
 import { fetchUser } from '../redux/actions';
-import { current } from '@reduxjs/toolkit';
 
 export class Main extends Component {
   componentDidMount() {
