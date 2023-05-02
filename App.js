@@ -36,6 +36,7 @@ import LandingScreen from './components/auth/Landing'
 import RegisterScreen from './components/auth/Register'
 import LoginScreen from './components/auth/Login'
 import MainScreen from './components/Main'
+import UploadScreen from './components/main/Upload'
 
 const Stack = createStackNavigator();
 
@@ -90,7 +91,12 @@ export class App extends Component {
 
     return(
       <Provider store = { store }>
-        <MainScreen/>
+        <NavigationContainer>
+          <Stack.Navigator initalRouteName="Main">
+              <Stack.Screen name="Main" component={ MainScreen } options={{ headerShown: false }} />
+              <Stack.Screen name="Upload" component={ UploadScreen }/>
+            </Stack.Navigator>
+          </NavigationContainer>
       </Provider>
     )
   }
