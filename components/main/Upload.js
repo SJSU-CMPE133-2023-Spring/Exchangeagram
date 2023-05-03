@@ -1,53 +1,54 @@
 import { Camera, CameraType } from 'expo-camera';
 import { useState } from 'react';
-import { Button, StyleSheet, Text, View, Image } from 'react-native';
+import { Button, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { Ionicons } from '@expo/vector-icons';
 
-
-export default function App() {
+export default function App({ navigation }) {
   const [type, setType] = useState(CameraType.back);
   const [permission, requestPermission] = Camera.useCameraPermissions();
   const [camera, setCamera] = useState(null);
   const [image, setImage] = useState(null);
+  const [showCamera, setShowCamera] = useState(true);
+  const [showRetake, setShowRetake] = useState(false);
+
 
   const takePicture = async () => {
-    if(camera){
+    if (camera) {
       const data = await camera.takePictureAsync(null);
       setImage(data.uri);
+      setShowRetake(true);
+      setShowCamera(false);
     }
-  }
+  };
 
   const pickImage = async () => {
-    // Ask for Permissions
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-  
-    // Permissions not Granted
+
     if (status !== 'granted') {
       alert('Sorry, we need camera roll permissions to make this work!');
       return;
     }
-  
+
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
-  
+
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-    }
+      setShowRetake(true);
+      setShowCamera(false);
+  }
   };
-  
-  
 
   if (!permission) {
-    // Camera permissions are still loading
     return <View />;
   }
 
   if (!permission.granted) {
-    // Camera permissions are not granted yet
     return (
       <View style={styles.container}>
         <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
@@ -61,44 +62,64 @@ export default function App() {
   }
 
   return (
-    <View style={ styles.container }>
-      <View style={ styles.cameraContainer }>
-        <Camera
-        ref= { ref => setCamera(ref) } 
-        style={styles.fixedRatio} 
-        type={type}
-        ratio={'1:1'}/>
+    <View style={styles.container}>
+      <View style={styles.cameraContainer}>
+        {showCamera ? (
+          <Camera
+            ref={ref => setCamera(ref)}
+            style={styles.fixedRatio}
+            type={type}
+            ratio={'1:1'}
+          />
+        ) : (
+          <Image source={{ uri: image }} style={styles.fixedRatio} />
+        )}
       </View>
-      <Button
-      title ="Switch Camera"
-      onPress={() => {
-        setType(
-          type === Camera.Constants.Type.back
-          ? Camera.Constants.Type.front
-          : Camera.Constants.Type.back
-        )
-      }}>
-      </Button>
-      <Button title = "Take Picture" onPress={() => takePicture()}/>
-      <Button title = "Pick Image From Gallery" onPress={() => pickImage()}/>
-      { image && <Image source = {{uri: image}} style= {styles.imageContainer}/> }
+      <View style={styles.controlsContainer}>
+        <TouchableOpacity onPress={toggleCameraType} style={styles.iconContainer}>
+          <Ionicons name="camera-reverse-outline" size={32} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={takePicture} style={styles.iconContainer}>
+          <Ionicons name="ellipse-outline" size={72} color="black" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={pickImage} style={styles.iconContainer}>
+          <Ionicons name="images-outline" size={32} color="black" />
+        </TouchableOpacity>
+      </View>
+      <Button title="Upload Picture" onPress={() => navigation.navigate('SavePhoto', { image })} />
+      { showRetake && (<Button title="Retake" onPress={() => {
+        setImage(null);
+        setShowRetake(false);
+        setShowCamera(true);
+      }}/>) }
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container:{
+  container: {
     flex: 1,
+    backgroundColor: '#ffffff',
   },
   fixedRatio: {
     flex: 1,
-    aspectRatio: 1
+    aspectRatio: 1,
   },
   cameraContainer: {
     flex: 1,
-    flexDirection: 'row'
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  imageContainer: {
-    flex: 1
-  }
+  controlsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingVertical: 20,
+    backgroundColor: 'white',
+  },
+  iconContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

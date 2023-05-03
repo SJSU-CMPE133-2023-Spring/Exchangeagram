@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, Text } from 'react-native'
 
 // Import firebase components
-import { initializeApp } from 'firebase/app';
+import firebaseApp from './components/firebaseConfig.js';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 import { Provider } from 'react-redux'; 
@@ -13,19 +13,8 @@ const store = configureStore({
   reducer: rootReducer,
 });
 
-const firebaseConfig = {
-  apiKey: "AIzaSyC63abKl535Hdz0gHccQ9qAFF-bHxWamOw",
-  authDomain: "exchangeagram-b6617.firebaseapp.com",
-  projectId: "exchangeagram-b6617",
-  storageBucket: "exchangeagram-b6617.appspot.com",
-  messagingSenderId: "17035677494",
-  appId: "1:17035677494:web:1690c2231be362112a6d97",
-  measurementId: "G-3Q716G2L8Q"
-};
-
 // INIT Firebase Components
-export const firebase = initializeApp(firebaseConfig);
-export const auth = getAuth(firebase);
+export const auth = getAuth(firebaseApp);
 
 // React Navigation Components
 import { NavigationContainer } from '@react-navigation/native';
@@ -37,6 +26,7 @@ import RegisterScreen from './components/auth/Register'
 import LoginScreen from './components/auth/Login'
 import MainScreen from './components/Main'
 import UploadScreen from './components/main/Upload'
+import SavePhotoScreen from './components/main/SavePhoto'
 
 const Stack = createStackNavigator();
 
@@ -82,8 +72,8 @@ export class App extends Component {
         <NavigationContainer>
           <Stack.Navigator initalRouteName="Landing">
             <Stack.Screen name="Landing" component={LandingScreen} options={{headerShown: false}} />
-            <Stack.Screen name="Register" component={RegisterScreen} />
-            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} navigation={this.props.navigation} />
+            <Stack.Screen name="Login" component={LoginScreen} navigation={this.props.navigation}/>
           </Stack.Navigator>
         </NavigationContainer>
       );
@@ -94,7 +84,8 @@ export class App extends Component {
         <NavigationContainer>
           <Stack.Navigator initalRouteName="Main">
               <Stack.Screen name="Main" component={ MainScreen } options={{ headerShown: false }} />
-              <Stack.Screen name="Upload" component={ UploadScreen }/>
+              <Stack.Screen name="Upload" component={ UploadScreen } navigation= { this.props.navigation }/>
+              <Stack.Screen name="SavePhoto" component={ SavePhotoScreen }/>
             </Stack.Navigator>
           </NavigationContainer>
       </Provider>

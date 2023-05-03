@@ -20,7 +20,7 @@ export class Login extends Component {
         const auth = getAuth();
         signInWithEmailAndPassword(auth, email, password)
         .then((result) => { // Succesfull Sign In
-            console.log(result)
+            //console.log(result)
         })
         .catch((error) => { // Error on Sign In
             console.log(error)
