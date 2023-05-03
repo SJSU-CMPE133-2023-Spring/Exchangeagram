@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Button, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import { SafeAreaView } from 'react-native';
 
 export default function App({ navigation }) {
   const [type, setType] = useState(CameraType.back);
@@ -60,9 +61,17 @@ export default function App({ navigation }) {
   function toggleCameraType() {
     setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
   }
-
+  
   return (
     <View style={styles.container}>
+      {image && (
+        <SafeAreaView style={styles.uploadButtonContainer}>
+          <Button
+            title="Upload Picture"
+            onPress={() => navigation.navigate('SavePhoto', { image })}
+          />
+        </SafeAreaView>
+      )}
       <View style={styles.cameraContainer}>
         {showCamera ? (
           <Camera
@@ -72,7 +81,19 @@ export default function App({ navigation }) {
             ratio={'1:1'}
           />
         ) : (
-          <Image source={{ uri: image }} style={styles.fixedRatio} />
+          <View>
+            <Image source={{ uri: image }} style={styles.imageFixedRatio} />
+            {showRetake && (
+              <Button
+                title="Retake"
+                onPress={() => {
+                  setImage(null);
+                  setShowRetake(false);
+                  setShowCamera(true);
+                }}
+              />
+            )}
+          </View>
         )}
       </View>
       <View style={styles.controlsContainer}>
@@ -86,12 +107,6 @@ export default function App({ navigation }) {
           <Ionicons name="images-outline" size={32} color="black" />
         </TouchableOpacity>
       </View>
-      <Button title="Upload Picture" onPress={() => navigation.navigate('SavePhoto', { image })} />
-      { showRetake && (<Button title="Retake" onPress={() => {
-        setImage(null);
-        setShowRetake(false);
-        setShowCamera(true);
-      }}/>) }
     </View>
   );
 }
@@ -122,4 +137,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  uploadButtonContainer: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1,
+  },imageFixedRatio: {
+    width: '100%',
+    aspectRatio: 1,
+  }
 });
