@@ -73,7 +73,7 @@ export class App extends Component {
           <Stack.Navigator initalRouteName="Landing">
             <Stack.Screen name="Landing" component={LandingScreen} options={{headerShown: false}} />
             <Stack.Screen name="Register" component={RegisterScreen} navigation={this.props.navigation} />
-            <Stack.Screen name="Login" component={LoginScreen} navigation={this.props.navigation}/>
+            <Stack.Screen name="Login" component={LoginScreen} navigation={this.props.navigation} />
           </Stack.Navigator>
         </NavigationContainer>
       );
