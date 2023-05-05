@@ -3,11 +3,10 @@ import { createMaterialBottomTabNavigator } from '@react-navigation/material-bot
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 
 import { connect } from 'react-redux';
-import { fetchUser } from '../redux/actions';
+import { fetchUser, fetchUserPosts } from '../redux/actions';
 import FeedScreen from './main/Feed'
 import ProfileScreen from './main/Profile'
-
-
+import { bindActionCreators } from 'redux';
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -18,6 +17,7 @@ const EmptyScreen =() => {
 export class Main extends Component {
   componentDidMount() {
     this.props.fetchUser();
+    this.props.fetchUserPosts();
   }
 
   render() {
@@ -56,8 +56,6 @@ const mapStateToProps = (store) => ({
   currentUser: store.userState.currentUser,
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  fetchUser: () => dispatch(fetchUser()),
-});
+const mapDispatchToProps = (dispatch) => bindActionCreators({ fetchUser, fetchUserPosts}, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Main);

@@ -4,7 +4,7 @@ import { View, TextInput, Image, StyleSheet, TouchableOpacity, Text } from 'reac
 // Firebase Components
 import { getAuth } from 'firebase/auth';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { getFirestore, collection, doc, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function PhotoSave(props) {
   const [caption, setCaption] = useState('');
