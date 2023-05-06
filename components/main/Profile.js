@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { connect } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,7 +10,7 @@ function Profile(props) {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.username}>USERNAMEHERE</Text>
+        <Text style={styles.username}>{currentUser.name}</Text>
         <View style={styles.userInfo}>
           <Image
             style={styles.profileImage}
@@ -32,7 +32,7 @@ function Profile(props) {
           </View>
         </View>
         <Text style={styles.name}>{currentUser.name}</Text>
-        <Text style={styles.descritpion}>descritpion will go here</Text>
+        <Text style={styles.description}>bio will go here</Text>
       </View>
       <View style={styles.gallery}>
         <FlatList
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     alignSelf: 'center',
   },
-  descritpion: {
+  description: {
     fontSize: 14,
     color: '#777',
     marginTop: 8,
