@@ -62,7 +62,15 @@ function Profile(props) {
         console.error('Error fetching user posts:', error);
       }
     }
-  }, [props.route.params.uid])
+
+    if (props.following.indexOf(props.route.params.uid) > -1) {
+      setFollowing(true);
+    }
+    else {
+      setFollowing(false);
+    }
+
+  }, [props.route.params.uid, props.following])
 
   const onFollow = () => {
     setDoc(
@@ -142,6 +150,7 @@ function Profile(props) {
 const mapStateToProps = (store) => ({
   currentUser: store.userState.currentUser,
   posts: store.userState.posts,
+  following: store.userState.following,
 });
 
 export default connect(mapStateToProps, null)(Profile);

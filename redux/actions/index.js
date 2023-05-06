@@ -1,5 +1,5 @@
-import { USER_STATE_CHANGE, USER_POSTS_STATE_CHANGE } from '../constants/index'
-import { getFirestore, collection, doc, getDocs, query, orderBy, getDoc } from 'firebase/firestore';
+import { USER_STATE_CHANGE, USER_POSTS_STATE_CHANGE, USER_FOLLOWING_STATE_CHANGE } from '../constants/index'
+import { getFirestore, collection, doc, getDocs, query, orderBy, getDoc, onSnapshot } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 
@@ -48,3 +48,36 @@ export function fetchUserPosts() {
     }
   };
 };
+
+export function fetchUserFollowing() {
+  return (dispatch) => {
+    const db = getFirestore();
+    const auth = getAuth();
+    const currentUserUid = auth.currentUser.uid;
+
+    onSnapshot(
+      collection(doc(db, 'following', currentUserUid),'userFollowing'),
+      (snapshot) => {
+        const following = snapshot.docs.map((doc) => doc.id);
+        dispatch({ type: USER_FOLLOWING_STATE_CHANGE, following });
+      }
+    );
+  };
+}
+
+// export function fetchUserFollowing() {
+//   return ((dispatch) => {
+//     firebase.firestore()
+//       .collection("following")
+//       .doc(firebase.auth().currentUser.uid)
+//       .collection("userFollowing")
+//       .onSnapshot((snapshot) => {
+//         let following = snapshot.docs.map(doc => {
+//           const id = doc.id;
+//           return id
+
+//         })
+//         dispatch({ type: USER_FOLLOWING_STATE_CHANGE, following})
+//       })
+//   })
+// }
