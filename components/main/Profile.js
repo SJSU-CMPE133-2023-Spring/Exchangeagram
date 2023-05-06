@@ -2,15 +2,31 @@ import React, {useState, useEffect} from 'react';
 import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { connect } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
+import { getAuth } from 'firebase/auth';
+
+const auth = getAuth();
 
 function Profile(props) {
-  const { currentUser, posts } = props;
-  console.log({currentUser, posts})
+  const [userPosts, setUserPosts] = useState([]);
+  const [user, setUser] = useState(null);
 
+  useEffect(() => {
+    const { currentUser, posts } = props;
+    console.log({ currentUser, posts })
+
+    if(props.route.params.uid === auth.currentUser.uid){
+      setUser(currentUser)
+      setUserPosts(posts)
+    }
+
+  })
+  if (user === null){
+    return <View/>
+  }
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.username}>{currentUser.name}</Text>
+        <Text style={styles.username}>{user.name}</Text>
         <View style={styles.userInfo}>
           <Image
             style={styles.profileImage}
@@ -18,7 +34,7 @@ function Profile(props) {
           />
           <View style={styles.stats}>
             <View style={styles.stat}>
-              <Text style={styles.statNumber}>{posts.length}</Text>
+              <Text style={styles.statNumber}>{userPosts.length}</Text>
               <Text style={styles.statLabel}>Posts</Text>
             </View>
             <View style={styles.stat}>
@@ -31,14 +47,14 @@ function Profile(props) {
             </View>
           </View>
         </View>
-        <Text style={styles.name}>{currentUser.name}</Text>
+        <Text style={styles.name}>{user.name}</Text>
         <Text style={styles.description}>bio will go here</Text>
       </View>
       <View style={styles.gallery}>
         <FlatList
           numColumns={3}
           horizontal={false}
-          data={posts}
+          data={userPosts}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.imageContainer}>
               <Image style={styles.image} source={{ uri: item.downloadURL }} />
