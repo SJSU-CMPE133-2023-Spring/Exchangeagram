@@ -2,25 +2,64 @@ import React, {useState, useEffect} from 'react';
 import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { connect } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
-import { getAuth } from 'firebase/auth';
 
-const auth = getAuth();
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, doc, getDocs, query, orderBy, getDoc } from 'firebase/firestore';
+
+const db = getFirestore();
 
 function Profile(props) {
   const [userPosts, setUserPosts] = useState([]);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    const auth = getAuth();
+    const currentUserUid = auth.currentUser.uid;
+
     const { currentUser, posts } = props;
     console.log({ currentUser, posts })
 
-    if(props.route.params.uid === auth.currentUser.uid){
+    if(props.route.params.uid === currentUserUid) {
       setUser(currentUser)
       setUserPosts(posts)
     }
+    else {
+      getDoc(doc(db, "users", props.route.params.uid)).then((snapshot) => {
+        if (snapshot.exists()) {
+          setUser(snapshot.data());
+        }
+        else {
+          console.log('does not exist ')
+        }
+      });
 
-  })
-  if (user === null){
+      try {
+        const fetchUserPosts = async () => {
+          const q = query(
+            collection(
+              doc(collection(db, 'posts'), props.route.params.uid),
+              'userPosts'
+            ),
+            orderBy('creation', 'asc')
+          );
+          const querySnapshot = await getDocs(q);
+          const posts = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            const id = doc.id;
+            // Convert the 'creation' field to a Unix timestamp
+            const creation = data.creation.toMillis();
+            return { id, ...data, creation };
+          });
+          setUserPosts(posts);
+        };
+        fetchUserPosts();
+      } 
+      catch (error) {
+        console.error('Error fetching user posts:', error);
+      }
+    }
+  }, [props.route.params.uid])
+  if (user === null) {
     return <View/>
   }
   return (
