@@ -1,16 +1,20 @@
 import React, {useState, useEffect} from 'react';
-import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity, Button } from 'react-native';
 import { connect } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 
-import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, doc, getDocs, query, orderBy, getDoc } from 'firebase/firestore';
+import { getAuth, currentUser } from 'firebase/auth';
+import { getFirestore, collection, doc, getDocs, query, orderBy, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 
 const db = getFirestore();
 
 function Profile(props) {
   const [userPosts, setUserPosts] = useState([]);
   const [user, setUser] = useState(null);
+  const [following, setFollowing] = useState(false);
+
+  const auth = getAuth();
+  const currentUserUid = auth.currentUser.uid;
 
   useEffect(() => {
     const auth = getAuth();
@@ -58,7 +62,29 @@ function Profile(props) {
         console.error('Error fetching user posts:', error);
       }
     }
-  }, [props.route.params.uid])
+
+    if (props.following.indexOf(props.route.params.uid) > -1) {
+      setFollowing(true);
+    }
+    else {
+      setFollowing(false);
+    }
+
+  }, [props.route.params.uid, props.following])
+
+  const onFollow = () => {
+    setDoc(
+      doc(db, 'following', currentUserUid, 'userFollowing', props.route.params.uid),
+      {}
+    );
+  }
+
+  const onUnfollow = () => {
+    deleteDoc(
+      doc(db, 'following', currentUserUid, 'userFollowing', props.route.params.uid)
+    );
+  }
+
   if (user === null) {
     return <View/>
   }
@@ -88,6 +114,22 @@ function Profile(props) {
         </View>
         <Text style={styles.name}>{user.name}</Text>
         <Text style={styles.description}>bio will go here</Text>
+        {props.route.params.uid !== currentUserUid ? (
+          <View>
+            {following ? (
+              <Button
+                title = "Following"
+                onPress = {() => onUnfollow()}
+              />
+            ) : 
+            (
+              <Button
+                title = "Follow"
+                onPress = {() => onFollow()}
+              />
+            )}
+          </View>
+        ) : null}
       </View>
       <View style={styles.gallery}>
         <FlatList
@@ -108,6 +150,7 @@ function Profile(props) {
 const mapStateToProps = (store) => ({
   currentUser: store.userState.currentUser,
   posts: store.userState.posts,
+  following: store.userState.following,
 });
 
 export default connect(mapStateToProps, null)(Profile);
