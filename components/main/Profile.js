@@ -1,16 +1,71 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import { connect } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 
-function Profile(props) {
-  const { currentUser, posts } = props;
-  console.log({currentUser, posts})
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, doc, getDocs, query, orderBy, getDoc } from 'firebase/firestore';
 
+const db = getFirestore();
+
+function Profile(props) {
+  const [userPosts, setUserPosts] = useState([]);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const currentUserUid = auth.currentUser.uid;
+
+    const { currentUser, posts } = props;
+    console.log({ currentUser, posts })
+
+    if(props.route.params.uid === currentUserUid) {
+      setUser(currentUser)
+      setUserPosts(posts)
+    }
+    else {
+      getDoc(doc(db, "users", props.route.params.uid)).then((snapshot) => {
+        if (snapshot.exists()) {
+          setUser(snapshot.data());
+        }
+        else {
+          console.log('does not exist ')
+        }
+      });
+
+      try {
+        const fetchUserPosts = async () => {
+          const q = query(
+            collection(
+              doc(collection(db, 'posts'), props.route.params.uid),
+              'userPosts'
+            ),
+            orderBy('creation', 'asc')
+          );
+          const querySnapshot = await getDocs(q);
+          const posts = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            const id = doc.id;
+            // Convert the 'creation' field to a Unix timestamp
+            const creation = data.creation.toMillis();
+            return { id, ...data, creation };
+          });
+          setUserPosts(posts);
+        };
+        fetchUserPosts();
+      } 
+      catch (error) {
+        console.error('Error fetching user posts:', error);
+      }
+    }
+  }, [props.route.params.uid])
+  if (user === null) {
+    return <View/>
+  }
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.username}>USERNAMEHERE</Text>
+        <Text style={styles.username}>{user.name}</Text>
         <View style={styles.userInfo}>
           <Image
             style={styles.profileImage}
@@ -18,7 +73,7 @@ function Profile(props) {
           />
           <View style={styles.stats}>
             <View style={styles.stat}>
-              <Text style={styles.statNumber}>{posts.length}</Text>
+              <Text style={styles.statNumber}>{userPosts.length}</Text>
               <Text style={styles.statLabel}>Posts</Text>
             </View>
             <View style={styles.stat}>
@@ -31,14 +86,14 @@ function Profile(props) {
             </View>
           </View>
         </View>
-        <Text style={styles.name}>{currentUser.name}</Text>
-        <Text style={styles.descritpion}>descritpion will go here</Text>
+        <Text style={styles.name}>{user.name}</Text>
+        <Text style={styles.description}>bio will go here</Text>
       </View>
       <View style={styles.gallery}>
         <FlatList
           numColumns={3}
           horizontal={false}
-          data={posts}
+          data={userPosts}
           renderItem={({ item }) => (
             <TouchableOpacity style={styles.imageContainer}>
               <Image style={styles.image} source={{ uri: item.downloadURL }} />
@@ -102,7 +157,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     alignSelf: 'center',
   },
-  descritpion: {
+  description: {
     fontSize: 14,
     color: '#777',
     marginTop: 8,
