@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 
@@ -16,8 +16,12 @@ export default function Search(props) {
   };
 
   return (
-    <View>
-      <TextInput placeholder="Type Here..." onChangeText={(search) => searchUsers(search)} />
+    <View style={styles.container}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search"
+        onChangeText={(search) => searchUsers(search)}
+      />
 
       <FlatList
         numColumns={1}
@@ -25,11 +29,37 @@ export default function Search(props) {
         data={users}
         renderItem={({ item }) => (
           <TouchableOpacity
-            onPress={() => props.navigation.navigate("Profile", {uid: item.id})}>
-            <Text>{item.name}</Text>
-          </TouchableOpacity>  
+            style={styles.userItem}
+            onPress={() => props.navigation.navigate('Profile', { uid: item.id })}>
+            <Text style={styles.userName}>{item.name}</Text>
+          </TouchableOpacity>
         )}
       />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    marginTop: 22
+  },
+  searchInput: {
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    margin: 16,
+  },
+  userItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+  },
+  userName: {
+    fontSize: 16,
+  },
+});
