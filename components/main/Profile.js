@@ -3,7 +3,7 @@ import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity, Button } fro
 import { connect } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 
-import { getAuth, currentUser } from 'firebase/auth';
+import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, doc, getDocs, query, orderBy, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 
 const db = getFirestore();
@@ -84,6 +84,10 @@ function Profile(props) {
     );
   }
 
+  const onLogout = () => {
+    signOut(auth);
+  }
+
   if (user === null) {
     return <View/>
   }
@@ -128,7 +132,13 @@ function Profile(props) {
               />
             )}
           </View>
-        ) : null}
+        ) : 
+        (
+          <Button
+                title = "Logout"
+                onPress = {() => onLogout()}
+              />
+        )}
       </View>
       <View style={styles.gallery}>
         <FlatList
