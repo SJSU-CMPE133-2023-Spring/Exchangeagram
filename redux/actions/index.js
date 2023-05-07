@@ -1,4 +1,4 @@
-import { USER_STATE_CHANGE, USER_POSTS_STATE_CHANGE, USER_FOLLOWING_STATE_CHANGE } from '../constants/index'
+import { USER_STATE_CHANGE, USER_POSTS_STATE_CHANGE, USER_FOLLOWING_STATE_CHANGE, USERS_DATA_STATE_CHANGE, USERS_POSTS_STATE_CHANGE } from '../constants/index'
 import { getFirestore, collection, doc, getDocs, query, orderBy, getDoc, onSnapshot } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
@@ -38,7 +38,6 @@ export function fetchUserPosts() {
       const posts = querySnapshot.docs.map(doc => {
         const data = doc.data();
         const id = doc.id;
-        // Convert the 'creation' field to a Unix timestamp
         const creation = data.creation.toMillis();
         return { id, ...data, creation };
       });
@@ -49,23 +48,8 @@ export function fetchUserPosts() {
   };
 };
 
-export function fetchUserFollowing() {
-  return (dispatch) => {
-    const db = getFirestore();
-    const auth = getAuth();
-    const currentUserUid = auth.currentUser.uid;
-
-    onSnapshot(
-      collection(doc(db, 'following', currentUserUid),'userFollowing'),
-      (snapshot) => {
-        const following = snapshot.docs.map((doc) => doc.id);
-        dispatch({ type: USER_FOLLOWING_STATE_CHANGE, following });
-      }
-    );
-  };
-}
-
-// export function fetchUserFollowing() {
+//-----------------------------------------------------------------------------------------------------------------------------
+// export function fetchUserFollowing() { // DONT USE THIS ITS A TEMPLATE
 //   return ((dispatch) => {
 //     firebase.firestore()
 //       .collection("following")
@@ -75,9 +59,143 @@ export function fetchUserFollowing() {
 //         let following = snapshot.docs.map(doc => {
 //           const id = doc.id;
 //           return id
-
 //         })
 //         dispatch({ type: USER_FOLLOWING_STATE_CHANGE, following})
+//         for (let i = 0; i < following.length; i++){
+//           dispatch(fetchUsersData(following[i]));
+//         }
 //       })
 //   })
 // }
+
+export function fetchUserFollowing() { // WORKING FULLY
+  return (dispatch) => {
+    const db = getFirestore();
+    const auth = getAuth();
+    const currentUserUid = auth.currentUser.uid;
+
+    onSnapshot(
+      collection(db, 'following', currentUserUid, 'userFollowing'),
+      (snapshot) => {
+        // We create an array to store the following users.
+        const following = snapshot.docs.map((doc) => doc.id);
+        
+        // Dispatch an action to update the state with the new following users.
+        dispatch({ type: USER_FOLLOWING_STATE_CHANGE, following });
+        
+        // For each following user, fetch their data and dispatch another action to update the state.
+        following.forEach((uid) => {
+          dispatch(fetchUsersData(uid));
+        });
+      }
+    );
+  };
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------
+// export function fetchUsersData(uid) { // DONT USE THIS ITS A TEMPLATE
+//   return((dispatch, getState) => {
+//     const found = getState().usersState.users.some(el => el.uid === uid);
+
+//     if(!found) {
+//       firebase.firestore()
+//         .collection("users")
+//         .doc(uid)
+//         .get()
+//         .then((snapshot) => {
+//           if (snapshot.exists) {
+//             let user = snapshot.data();
+//             user.uid = snapshot.id;
+
+//             dispatch({ type: USERS_DATA_STATE_CHANGE, user });
+//             dispatch(fetchUsersFollowingPosts(user.id));
+//           }
+//           else {
+//             console.log('does not exist')
+//           }
+//         })
+//     }
+//   })
+// }
+
+export function fetchUsersData(uid) {
+  return async (dispatch, getState) => {
+    const found = getState().usersState.users.some(el => el.uid === uid);
+
+    if (!found) {
+      const db = getFirestore();
+      const userRef = doc(db, "users", uid);
+
+      try {
+        const userDoc = await getDoc(userRef);
+
+        if (userDoc.exists()) {
+          const user = userDoc.data();
+          user.uid = userDoc.id;
+
+          // Dispatch an action to update the state with the user data.
+          dispatch({ type: USERS_DATA_STATE_CHANGE, user });
+          
+          // Fetch the user's following posts and update the state.
+          dispatch(fetchUsersFollowingPosts(user.uid));
+        } else {
+          console.log('User does not exist');
+        }
+      } catch (error) {
+        console.log('Error fetching user data:', error);
+      }
+    }
+  };
+}
+//-----------------------------------------------------------------------------------------------------------------------------
+// export function fetchUsersFollowingPosts(uid) { // DONT USE THIS ITS A TEMPLATE
+//   return ((dispatch, getState) => {
+//     firebase.firestore()
+//       .collection("posts")
+//       .doc(uid)
+//       .collection("userPosts")
+//       .orderBy("creation", "asc")
+//       .get()
+//       .then((snapshot) => {
+//         const uid = snapshot.query.EP.path.segments[1];
+//         console.log({snapshot, uid});
+//         const user = getState().usersState.users.find(el => el.uid === uid);
+
+//         let posts = snapshot.docs.map(doc => {
+//           const data = doc.data();
+//           const id = doc.id;
+//           return {id, ...data, user}
+//         })
+//         dispatch({ type: USERS_POSTS_STATE_CHANGE, posts, uid})
+//       })
+//   })
+// }
+
+export function fetchUsersFollowingPosts(uid) {
+  return async (dispatch, getState) => {
+    try {
+      const db = getFirestore();
+      const userPostsRef = collection(doc(db, 'posts', uid), 'userPosts');
+      const postsQuery = query(userPostsRef, orderBy('creation', 'asc'));
+
+      const snapshot = await getDocs(postsQuery);
+      const fetchedUid = uid;
+
+      console.log({ snapshot, fetchedUid });
+      
+      const user = getState().usersState.users.find(el => el.uid === fetchedUid);
+
+      const posts = snapshot.docs.map(doc => {
+        const data = doc.data();
+        const id = doc.id;
+        // Convert the creation field to a timestamp (in milliseconds)
+        const creation = data.creation.toMillis();
+        return { id, ...data, creation, user };
+      });
+
+      dispatch({ type: USERS_POSTS_STATE_CHANGE, posts, uid: fetchedUid });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+}

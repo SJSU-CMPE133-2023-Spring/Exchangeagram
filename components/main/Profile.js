@@ -21,7 +21,7 @@ function Profile(props) {
     const currentUserUid = auth.currentUser.uid;
 
     const { currentUser, posts } = props;
-    console.log({ currentUser, posts })
+    //console.log({ currentUser, posts })
 
     if(props.route.params.uid === currentUserUid) {
       setUser(currentUser)
