@@ -68,24 +68,30 @@ export function fetchUserPosts() {
 //   })
 // }
 
-export function fetchUserFollowing() { // WORKING VERSION
+export function fetchUserFollowing() { // WORKING FULLY
   return (dispatch) => {
     const db = getFirestore();
     const auth = getAuth();
     const currentUserUid = auth.currentUser.uid;
 
     onSnapshot(
-      collection(doc(db, 'following', currentUserUid),'userFollowing'),
+      collection(db, 'following', currentUserUid, 'userFollowing'),
       (snapshot) => {
+        // We create an array to store the following users.
         const following = snapshot.docs.map((doc) => doc.id);
+        
+        // Dispatch an action to update the state with the new following users.
         dispatch({ type: USER_FOLLOWING_STATE_CHANGE, following });
-        for (let i = 0; i < following.length; i++){
-          dispatch(fetchUsersData(following[i]));
-        }
+        
+        // For each following user, fetch their data and dispatch another action to update the state.
+        following.forEach((uid) => {
+          dispatch(fetchUsersData(uid));
+        });
       }
     );
   };
 }
+
 //-----------------------------------------------------------------------------------------------------------------------------
 // export function fetchUsersData(uid) { // DONT USE THIS ITS A TEMPLATE
 //   return((dispatch, getState) => {
@@ -127,13 +133,16 @@ export function fetchUsersData(uid) {
           const user = userDoc.data();
           user.uid = userDoc.id;
 
+          // Dispatch an action to update the state with the user data.
           dispatch({ type: USERS_DATA_STATE_CHANGE, user });
-          dispatch(fetchUsersFollowingPosts(user.id));
+          
+          // Fetch the user's following posts and update the state.
+          dispatch(fetchUsersFollowingPosts(user.uid));
         } else {
-          console.log('does not exist');
+          console.log('User does not exist');
         }
       } catch (error) {
-        console.log(error);
+        console.log('Error fetching user data:', error);
       }
     }
   };
@@ -179,7 +188,9 @@ export function fetchUsersFollowingPosts(uid) {
       const posts = snapshot.docs.map(doc => {
         const data = doc.data();
         const id = doc.id;
-        return { id, ...data, user };
+        // Convert the creation field to a timestamp (in milliseconds)
+        const creation = data.creation.toMillis();
+        return { id, ...data, creation, user };
       });
 
       dispatch({ type: USERS_POSTS_STATE_CHANGE, posts, uid: fetchedUid });
