@@ -24,7 +24,7 @@ function Feed(props) {
         }
       }
       posts.sort(function (x, y) {
-        return x.creation - y.creation;
+        return y.creation - x.creation;
       });
       setPosts(posts);
     }
