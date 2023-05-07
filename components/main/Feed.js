@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  Button,
-} from 'react-native';
+import { View, Text, Image, FlatList, StyleSheet, TouchableOpacity, Button, onPress } from 'react-native';
 import { connect } from 'react-redux';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -49,6 +41,9 @@ function Feed(props) {
               <Text style={styles.name}>{item.user.name}</Text>
             </View>
             <Image style={styles.postImage} source={{ uri: item.downloadURL }} />
+            <Text onPress={() => props.navigation.navigate('Comment', { postId: item.id, uid: item.user.uid })}>
+            View Comments...
+            </Text>
           </View>
         )}
         keyExtractor={(item) => item.id}
