@@ -64,41 +64,38 @@ export function fetchUserFollowing() { // WORKING FULLY
         
         // For each following user, fetch their data and dispatch another action to update the state.
         following.forEach((uid) => {
-          dispatch(fetchUsersData(uid));
+          dispatch(fetchUsersData(uid, true));
         });
       }
     );
   };
 }
 
-export function fetchUsersData(uid) {
+export function fetchUsersData(uid, getPosts) {
   return async (dispatch, getState) => {
     const found = getState().usersState.users.some(el => el.uid === uid);
 
     if (!found) {
       const db = getFirestore();
       const userRef = doc(db, "users", uid);
+      const userDoc = await getDoc(userRef);
 
-      try {
-        const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        const user = userDoc.data();
+        user.uid = userDoc.id;
 
-        if (userDoc.exists()) {
-          const user = userDoc.data();
-          user.uid = userDoc.id;
-
-          // Dispatch an action to update the state with the user data.
-          dispatch({ type: USERS_DATA_STATE_CHANGE, user });
-          
-          // Fetch the user's following posts and update the state.
-          dispatch(fetchUsersFollowingPosts(user.uid));
-        } else {
-          console.log('User does not exist');
-        }
-      } catch (error) {
-        console.log('Error fetching user data:', error);
+        // Dispatch an action to update the state with the user data.
+        dispatch({ type: USERS_DATA_STATE_CHANGE, user });
+      } 
+      else {
+        console.log('User does not exist');
       }
-    }
-  };
+      if (getPosts) {
+        // Fetch the user's following posts and update the state.
+        dispatch(fetchUsersFollowingPosts(uid));
+      }
+    } 
+  }
 }
 
 export function fetchUsersFollowingPosts(uid) {

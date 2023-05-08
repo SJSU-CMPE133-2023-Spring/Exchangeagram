@@ -27,6 +27,7 @@ import LoginScreen from './components/auth/Login'
 import MainScreen from './components/Main'
 import UploadScreen from './components/main/Upload'
 import SavePhotoScreen from './components/main/SavePhoto'
+import CommentScreen from './components/main/Comment'
 
 const Stack = createStackNavigator();
 
@@ -86,6 +87,7 @@ export class App extends Component {
               <Stack.Screen name="Main" component={ MainScreen } options={{ headerShown: false }} />
               <Stack.Screen name="Upload" component={ UploadScreen } navigation= { this.props.navigation }/>
               <Stack.Screen name="SavePhoto" component={ SavePhotoScreen }/>
+              <Stack.Screen name="Comment" component={ CommentScreen } navigation= { this.props.navigation }/>
             </Stack.Navigator>
           </NavigationContainer>
       </Provider>
