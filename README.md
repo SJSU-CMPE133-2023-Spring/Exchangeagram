@@ -11,7 +11,7 @@
 1. Install [Node.js](https://nodejs.org/en)
 2. Install [git](https://git-scm.com/downloads)
 3. Clone the repo
-   1. git clone https://github.com/SJSU-CMPE133-2023-Spring/Software_Engineering_Sample_Repo.git
+   1. ```git clone https://github.com/SJSU-CMPE133-2023-Spring/Software_Engineering_Sample_Repo.git```
 4. Install following in the terminal
    1. Expo
       1. ```npm install -g expo-cli ```
