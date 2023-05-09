@@ -114,6 +114,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#dddddd',
+    marginTop: 12,
   },
   headerTitle: {
     fontSize: 24,

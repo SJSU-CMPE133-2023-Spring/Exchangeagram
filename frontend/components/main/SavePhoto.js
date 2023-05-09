@@ -49,6 +49,7 @@ export default function PhotoSave(props) {
       await addDoc(postsRef, {
         downloadURL,
         caption,
+        likesCount: 0,
         creation: serverTimestamp(),
       });
       props.navigation.popToTop();
